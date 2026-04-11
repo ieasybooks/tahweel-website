@@ -219,6 +219,40 @@
         height: 20px;
       }
 
+      /* Platform Links */
+      .platform-links {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 25px;
+        font-size: 0.875rem;
+      }
+
+      .platform-links-label {
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      .platform-link {
+        color: var(--text-light);
+        text-decoration: none;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(229, 231, 235, 0.8);
+        transition: all 0.2s ease;
+        font-weight: 500;
+      }
+
+      .platform-link:hover {
+        background: white;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+      }
+
       /* Section Styling */
       section {
         padding: 80px 0;
@@ -480,13 +514,13 @@
           أداة قوية لتحويل ملفات PDF والصور إلى نصوص باستخدام Google Drive OCR
         </p>
         <div class="btn-group animate-in delay-3">
-          <a href="https://github.com/ieasybooks/tahweel.rb/releases/latest" class="btn btn-primary" id="downloadBtn">
+          <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="btn btn-primary" id="downloadBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span id="downloadText">تحميل للويندوز</span>
+            <span id="downloadText">تحميل</span>
           </a>
           <a href="https://github.com/ieasybooks/tahweel.rb" class="btn btn-secondary" target="_blank">
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -494,6 +528,14 @@
             </svg>
             GitHub
           </a>
+        </div>
+        <div class="platform-links animate-in delay-4" id="platformLinks">
+          <span class="platform-links-label" id="platformLinksLabel">منصات أخرى:</span>
+          <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlWindowsExe">Windows (.exe)</a>
+          <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlWindowsMsi">Windows (.msi)</a>
+          <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlMac">macOS (.dmg)</a>
+          <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlLinuxDeb">Linux (.deb)</a>
+          <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlLinuxApp">Linux (AppImage)</a>
         </div>
       </div>
     </section>
@@ -650,7 +692,13 @@
           btn: "English",
           pageTitle: "تحويل | أداة تحويل PDF إلى نص",
           heroTagline: "أداة قوية لتحويل ملفات PDF والصور إلى نصوص باستخدام Google Drive OCR",
-          downloadText: "تحميل للويندوز",
+          downloadText: "تحميل",
+          downloadFor: {
+            mac: "تحميل لنظام macOS",
+            windows: "تحميل لنظام ويندوز",
+            linux: "تحميل لنظام لينكس"
+          },
+          platformLinksLabel: "منصات أخرى:",
           videosTitle: "شاهد تحويل وهو يعمل",
           videosSubtitle: "تعرف على كيفية استخدام تحويل من خلال هذه الفيديوهات التوضيحية",
           video1Title: "عرض تطبيق سطح المكتب",
@@ -681,7 +729,13 @@
           btn: "العربية",
           pageTitle: "Tahweel | PDF to Text OCR Tool",
           heroTagline: "A powerful tool to convert PDF and image files to text using Google Drive OCR",
-          downloadText: "Download for Windows",
+          downloadText: "Download",
+          downloadFor: {
+            mac: "Download for macOS",
+            windows: "Download for Windows",
+            linux: "Download for Linux"
+          },
+          platformLinksLabel: "Other platforms:",
           videosTitle: "Watch Tahweel in Action",
           videosSubtitle: "Learn how to use Tahweel through these tutorial videos",
           video1Title: "Desktop App Preview",
@@ -730,7 +784,8 @@
         // Update all text content
         document.getElementById('btnText').textContent = c.btn;
         document.getElementById('heroTagline').textContent = c.heroTagline;
-        document.getElementById('downloadText').textContent = c.downloadText;
+        updatePrimaryDownloadLabel();
+        document.getElementById('platformLinksLabel').textContent = c.platformLinksLabel;
         document.getElementById('videosTitle').textContent = c.videosTitle;
         document.getElementById('videosSubtitle').textContent = c.videosSubtitle;
         document.getElementById('video1Title').textContent = c.video1Title;
@@ -758,25 +813,86 @@
         document.getElementById('footerText').innerHTML = c.footerText + ' <a href="https://ieasybooks.com" target="_blank">iEasyBooks</a>';
       }
 
-      // Fetch latest release EXE download URL from GitHub API
+      // Asset patterns for tahweel-tauri release binaries.
+      // Matched by suffix so version bumps don't break the lookup.
+      const assetPatterns = {
+        windowsExe:    /x64-setup\.exe$/i,
+        windowsMsi:    /\.msi$/i,
+        macUniversal:  /universal\.dmg$/i,
+        linuxDeb:      /amd64\.deb$/i,
+        linuxAppImage: /amd64\.AppImage$/i,
+      };
+
+      // Map detected OS to its preferred primary asset.
+      const primaryByOS = {
+        mac: 'macUniversal',
+        windows: 'windowsExe',
+        linux: 'linuxAppImage',
+      };
+
+      // DOM ids for the secondary platform links.
+      const platformLinkIds = {
+        windowsExe: 'dlWindowsExe',
+        windowsMsi: 'dlWindowsMsi',
+        macUniversal: 'dlMac',
+        linuxDeb: 'dlLinuxDeb',
+        linuxAppImage: 'dlLinuxApp',
+      };
+
+      function detectOS() {
+        const ua = (navigator.userAgent || '').toLowerCase();
+        const platform = (navigator.platform || '').toLowerCase();
+        if (/mac|iphone|ipad|ipod/.test(ua) || /mac/.test(platform)) return 'mac';
+        if (/win/.test(ua) || /win/.test(platform)) return 'windows';
+        if (/linux|x11|ubuntu|fedora|debian/.test(ua) || /linux/.test(platform)) return 'linux';
+        return null;
+      }
+
+      const detectedOS = detectOS();
+
+      function updatePrimaryDownloadLabel() {
+        const c = content[currentLang];
+        // When OS detection fails, default to Windows.
+        const os = detectedOS || 'windows';
+        const text = (c.downloadFor && c.downloadFor[os]) || c.downloadText;
+        document.getElementById('downloadText').textContent = text;
+      }
+
+      // Fetch latest release from tahweel-tauri and wire up download buttons.
       async function fetchLatestRelease() {
         try {
-          const response = await fetch('https://api.github.com/repos/ieasybooks/tahweel.rb/releases/latest');
+          const response = await fetch('https://api.github.com/repos/ieasybooks/tahweel-tauri/releases/latest');
+          if (!response.ok) throw new Error('GitHub API ' + response.status);
           const release = await response.json();
-          
-          // Find the .exe asset
-          const exeAsset = release.assets.find(asset => asset.name.endsWith('.exe'));
-          
-          if (exeAsset) {
-            const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.href = exeAsset.browser_download_url;
+
+          // Resolve each pattern to an asset download URL.
+          const downloads = {};
+          for (const [key, pattern] of Object.entries(assetPatterns)) {
+            const asset = release.assets.find(a => pattern.test(a.name));
+            if (asset) downloads[key] = asset.browser_download_url;
+          }
+
+          // Wire up the secondary platform links.
+          for (const [key, id] of Object.entries(platformLinkIds)) {
+            if (downloads[key]) {
+              document.getElementById(id).href = downloads[key];
+            }
+          }
+
+          // Wire up the primary button to the OS-matched asset.
+          // When OS detection fails, default to Windows.
+          const primaryKey = primaryByOS[detectedOS || 'windows'] || 'windowsExe';
+          const primaryUrl = downloads[primaryKey] || Object.values(downloads)[0];
+          if (primaryUrl) {
+            document.getElementById('downloadBtn').href = primaryUrl;
           }
         } catch (error) {
           console.log('Could not fetch latest release, using fallback URL');
         }
       }
 
-      // Fetch release on page load
+      // Set the OS-aware label immediately, then fetch hrefs from GitHub.
+      updatePrimaryDownloadLabel();
       fetchLatestRelease();
 
       // Smooth scroll for anchor links
