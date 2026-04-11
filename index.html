@@ -253,6 +253,29 @@
         transform: translateY(-2px);
       }
 
+      /* Colab row: sits right under the platform binaries row,
+         reuses the pill style but with a Colab-orange hover accent. */
+      .platform-links.colab-row {
+        margin-top: 12px;
+      }
+
+      .platform-link.colab-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .platform-link.colab-link svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      .platform-link.colab-link:hover {
+        color: #f9ab00;
+        border-color: #f9ab00;
+      }
+
       /* Section Styling */
       section {
         padding: 80px 0;
@@ -537,6 +560,15 @@
           <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlLinuxDeb">Linux (.deb)</a>
           <a href="https://github.com/ieasybooks/tahweel-tauri/releases/latest" class="platform-link" id="dlLinuxApp">Linux (AppImage)</a>
         </div>
+        <div class="platform-links colab-row animate-in delay-4">
+          <span class="platform-links-label" id="colabLinksLabel">أو جرّبها من المتصفح بدون تثبيت:</span>
+          <a href="https://colab.research.google.com/github/ieasybooks/tahweel/blob/main/colab_notebook.ipynb" class="platform-link colab-link" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path fill="#F9AB00" d="M16.9414 4.9757a7.033 7.033 0 0 0-4.9308 2.0646 7.033 7.033 0 0 0-.1232 9.8068l2.395-2.395a3.6455 3.6455 0 0 1 5.1497-5.1478l2.397-2.3989a7.033 7.033 0 0 0-4.8877-1.9297zM7.07 4.9855a7.033 7.033 0 0 0-4.8878 1.9316l2.3911 2.3911a3.6434 3.6434 0 0 1 5.0227.1271l1.7341-2.9737-.0997-.0802A7.033 7.033 0 0 0 7.07 4.9855zm15.0093 2.1721l-2.3892 2.3911a3.6447 3.6447 0 0 1-5.1497 5.1497l-2.4067 2.4068a7.0362 7.0362 0 0 0 9.9456-9.9476zM1.932 7.1674a7.033 7.033 0 0 0-.002 9.9476l2.3892-2.3911a3.6447 3.6447 0 0 1 0-5.1497zm7.8726 7.8823a3.6429 3.6429 0 0 1-5.0218-.1241l-2.3911 2.3911a7.033 7.033 0 0 0 9.8048-.1231z"/>
+            </svg>
+            Google Colab
+          </a>
+        </div>
       </div>
     </section>
 
@@ -699,6 +731,7 @@
             linux: "تحميل لنظام لينكس"
           },
           platformLinksLabel: "منصات أخرى:",
+          colabLinksLabel: "أو جرّبها من المتصفح بدون تثبيت:",
           videosTitle: "شاهد تحويل وهو يعمل",
           videosSubtitle: "تعرف على كيفية استخدام تحويل من خلال هذه الفيديوهات التوضيحية",
           video1Title: "عرض تطبيق سطح المكتب",
@@ -736,6 +769,7 @@
             linux: "Download for Linux"
           },
           platformLinksLabel: "Other platforms:",
+          colabLinksLabel: "Or try it online — no install needed:",
           videosTitle: "Watch Tahweel in Action",
           videosSubtitle: "Learn how to use Tahweel through these tutorial videos",
           video1Title: "Desktop App Preview",
@@ -786,6 +820,7 @@
         document.getElementById('heroTagline').textContent = c.heroTagline;
         updatePrimaryDownloadLabel();
         document.getElementById('platformLinksLabel').textContent = c.platformLinksLabel;
+        document.getElementById('colabLinksLabel').textContent = c.colabLinksLabel;
         document.getElementById('videosTitle').textContent = c.videosTitle;
         document.getElementById('videosSubtitle').textContent = c.videosSubtitle;
         document.getElementById('video1Title').textContent = c.video1Title;
