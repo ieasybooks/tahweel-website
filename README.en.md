@@ -1,3 +1,7 @@
+> **Archived:** This website repository is no longer maintained. Use [arabi.tools](https://arabi.tools) as the current web alternative for extracting text from PDFs and images.
+>
+> The documentation below describes the archived website.
+
 <p align="center">
   <img src="logo.png" alt="Tahweel Logo" width="200" />
 </p>
